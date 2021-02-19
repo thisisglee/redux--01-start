@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
 import counterReducer from './store/reducers/counter';
 import resultReducer from './store/reducers/results';
 import { Provider } from 'react-redux';
@@ -16,8 +17,26 @@ const rootReducer = combineReducers({
   ctr: counterReducer,
   res: resultReducer,
 });
+
+//middleware
+const logger = (store) => {
+  return (next) => {
+    return (action) => {
+      console.log(`[Middleware] Disptaching`, action);
+      const result = action;
+      console.log(`[Middleware] next State`, store.getState());
+      next(result);
+    };
+  };
+};
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
 //store
-const store = createStore(rootReducer);
+const store = createStore(
+  rootReducer,
+  composeEnhancers(applyMiddleware(logger, thunk))
+);
 
 //subscription
 
